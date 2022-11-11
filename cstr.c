@@ -14,14 +14,10 @@ cstr cstrInit(char *from) {
 }
 
 void makeRoomFor(cstr s, size_t len) {
-    bool needs_realloc = false;
-    while (s->alloc <= len) {
-        if (s->alloc < len) {
+    if (s->alloc <= len) {
+        while (s->alloc <= len) {
             s->alloc *= 2;
-            needs_realloc = true;
         }
-    }
-    if (needs_realloc) {
         s->string = realloc(s->string, s->alloc);
     }
 }

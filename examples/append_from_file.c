@@ -15,7 +15,7 @@ int main() {
     cstr str;
     bool first = true;
 
-    if ((f = fopen("output.txt", "r"))) {
+    if ((f = fopen("large_string.txt", "r"))) {
         while (fgets(buf, BUFF_SIZE, f)) {
             if (first) {             // need to initialize cstr but only once
                 str = cstrInit(buf); // returns initialized cstr with string set to first buffer
