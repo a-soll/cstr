@@ -1,4 +1,5 @@
 #include "cstr.h"
+#include <stdbool.h>
 #include <stdio.h>
 
 cstr cstrInit(char *from) {
@@ -13,12 +14,16 @@ cstr cstrInit(char *from) {
 }
 
 void makeRoomFor(cstr s, size_t len) {
-    while (s->alloc < len) {
+    bool needs_realloc = false;
+    while (s->alloc <= len) {
         if (s->alloc < len) {
             s->alloc *= 2;
+            needs_realloc = true;
         }
     }
-    s->string = realloc(s->string, s->alloc);
+    if (needs_realloc) {
+        s->string = realloc(s->string, s->alloc);
+    }
 }
 
 void cstrGrow(cstr s, size_t len) {
@@ -26,7 +31,7 @@ void cstrGrow(cstr s, size_t len) {
     if (len > cur_alloc) {
         s->string = realloc(s->string, len);
         s->alloc = len;
-        memset(s->string + s->len, 0, (s->alloc - cur_alloc + 1));
+        memset(s->string + s->len, 0, (s->alloc - cur_alloc));
     }
 }
 
@@ -34,8 +39,8 @@ void cstrCat(cstr to, const char *from) {
     size_t cur_len = to->len;
     size_t from_len = strlen(from);
     size_t needs = from_len + cur_len;
-    makeRoomFor(to, from_len);
-    memcpy(to->string + cur_len, from, needs);
+    makeRoomFor(to, needs);
+    memcpy(to->string + cur_len, from, from_len);
     to->len = needs;
     to->string[to->len] = '\0';
 }
