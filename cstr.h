@@ -21,15 +21,18 @@ cstr *cstrSplit(cstr str, char split_on, int *count);
 /**
  * search for character and return string from there.
  * expr is the char to search for [0], the direction to search from [1],
- * and direction to add to string [2]
+ * and direction to add to string [2]. can include multiple patterns.
  *
  * ex (assume passing cstr with these strings):
  * pathcomp(a.b.c, .LL) -> a
  * pathcomp(a.b.c, .LR) -> b.c
  * pathcomp(a.b.c, .RR) -> c
  * pathcomp(a.b.c, .RL) -> a.b
+ * pathcomp(a.b.c, .LR.RL) -> b
  */
 cstr pathcomp(cstr s, const char *expr);
 void cstrArrayDealloc(cstr *arr);
+// update cstr->string to new value (from)
+void cstrUpdateString(cstr str, char *from);
 
 #endif /* CS_H */
