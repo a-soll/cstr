@@ -67,8 +67,9 @@ void cstrArrayDealloc(cstr *arr) {
 
 cstr *cstrSplit(cstr str, char split_on, int *count) {
     int ind = 0;
+    *count = 0;
     int elements = 0;
-    int slots = 2;
+    int slots = 3; // minimum size for 2 elements + NULL
     char tmp[str->len];
     cstr *c = malloc(sizeof(cstr) * slots);
 
@@ -87,14 +88,21 @@ cstr *cstrSplit(cstr str, char split_on, int *count) {
             ind++;
         }
     }
-    if (slots == elements) { // resize to fit terminating NULL
+    // nothing to split
+    if (elements == 0) {
+        c[0] = NULL;
+        return c;
+    }
+    if (slots <= elements + 2) { // resize to fit terminating NULL
         c = realloc(c, sizeof(cstr) * (slots + 1));
     }
-    tmp[ind] = '\0';
-    c[elements] = cstrInit(tmp);
-    elements++;
-    c[elements] = NULL;
-    *count = elements;
+    if (elements > 0) {
+        tmp[ind] = '\0';
+        c[elements] = cstrInit(tmp);
+        elements++;
+        c[elements] = NULL;
+        *count = elements;
+    }
     return c;
 }
 
