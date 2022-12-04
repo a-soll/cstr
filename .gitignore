@@ -4,3 +4,4 @@ a.out
 .vscode
 .DS_Store
 *.dSYM
+test.c
