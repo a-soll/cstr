@@ -13,13 +13,23 @@ cstr cstrInit(char *from) {
     return ret;
 }
 
-void makeRoomFor(cstr s, size_t len) {
+static void makeRoomFor(cstr s, size_t len) {
     if (s->alloc <= len) {
         while (s->alloc <= len) {
             s->alloc *= 2;
         }
         s->string = realloc(s->string, s->alloc);
     }
+}
+
+void cstrUpdateString(cstr str, char *from) {
+    size_t from_len = strlen(from);
+    if (from_len > str->alloc) {
+        makeRoomFor(str, from_len);
+    }
+    memcpy(str->string, from, from_len);
+    str->string[from_len] = '\0';
+    str->len = from_len;
 }
 
 void cstrGrow(cstr s, size_t len) {
@@ -116,7 +126,9 @@ static int pathcompRight(cstr str, char *tmp, const char *expr) {
         }
         char *start = &str->string[0];
         char *end = &str->string[item_ind];
+        int new_len = item_ind;
         memcpy(tmp, start, end - start);
+        tmp[new_len] = '\0';
     } else { // invalid pattern
         return -1;
     }
@@ -151,6 +163,40 @@ static int pathcompLeft(cstr str, char *tmp, const char *expr) {
     return item_ind;
 }
 
+static int startPathComp(cstr str, char *tmp, const char *expr) {
+    int item_ind = -1;
+    if (expr[1] == 'L') {
+        item_ind = pathcompLeft(str, tmp, expr);
+    } else if (expr[1] == 'R') {
+        item_ind = pathcompRight(str, tmp, expr);
+    } else { // invalid pattern
+        return -1;
+    }
+    return item_ind;
+}
+
+// handles multiple patterns in single expr
+static int pathloop(cstr str, char *tmp, const char *expr) {
+    char new_expr[4];
+    int offset = 6;
+    int i = 3;
+    int item_ind = -1;
+    while (i <= strlen(expr) - 1) {
+        const char *start = &expr[i];
+        const char *end = &expr[offset];
+        memcpy(new_expr, start, end - start);
+        new_expr[3] = '\0';
+        item_ind = startPathComp(str, tmp, new_expr);
+        i += 3;
+        offset += 3;
+        if (item_ind == -1) {
+            return -1;
+        }
+        cstrUpdateString(str, tmp);
+    }
+    return 0;
+}
+
 cstr pathcomp(cstr s, const char *expr) {
     cstr str = NULL;
     char tmp[s->len];
@@ -159,15 +205,11 @@ cstr pathcomp(cstr s, const char *expr) {
     if (strlen(expr) < 3) {
         return NULL;
     }
-    if (expr[1] == 'L') {
-        item_ind = pathcompLeft(s, tmp, expr);
-    } else if (expr[1] == 'R') {
-        item_ind = pathcompRight(s, tmp, expr);
-    } else { // invalid pattern
-        return str;
+    item_ind = startPathComp(s, tmp, expr);
+    if (item_ind == -1) {
+        return NULL;
     }
-    if (item_ind >= 0) {
-        str = cstrInit(tmp);
-    }
+    str = cstrInit(tmp);
+    item_ind = pathloop(str, tmp, expr);
     return str;
 }
