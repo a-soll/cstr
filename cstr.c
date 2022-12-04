@@ -6,7 +6,7 @@ cstr cstrInit(char *from) {
     size_t from_len = strlen(from);
     cstr ret = (cstr)malloc(sizeof(_cs));
     ret->len = from_len;
-    ret->string = malloc(sizeof(char) * from_len);
+    ret->string = malloc(sizeof(char) * from_len + 1);
     ret->alloc = from_len;
     memcpy(ret->string, from, from_len);
     ret->string[from_len] = '\0';
@@ -77,7 +77,7 @@ cstr *cstrSplit(cstr str, char split_on, int *count) {
             ind++;
         }
     }
-    if (slots == elements) { // set terminating NULL element for convenience
+    if (slots == elements) { // resize to fit terminating NULL
         c = realloc(c, sizeof(cstr) * (slots + 1));
     }
     tmp[ind] = '\0';
