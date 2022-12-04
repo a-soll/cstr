@@ -1,8 +1,3 @@
-/**
- * compile with:
- * clang append_from_file.c ../cstr.c
- */
-
 #include "../cstr.h"
 #include <stdbool.h>
 #include <stdio.h>
