@@ -1,6 +1,7 @@
 #ifndef CS_H
 #define CS_H
 
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -34,5 +35,11 @@ cstr pathcomp(cstr s, const char *expr);
 void cstrArrayDealloc(cstr *arr);
 // update cstr->string to new value (from)
 void cstrUpdateString(cstr str, char *from);
+/**
+ * format a cstr
+ * %s for string
+ * %d for int
+ */
+void cstrCatFmt(cstr s, char const *fmt, ...);
 
 #endif /* CS_H */

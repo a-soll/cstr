@@ -221,3 +221,78 @@ cstr pathcomp(cstr s, const char *expr) {
     item_ind = pathloop(str, tmp, expr);
     return str;
 }
+
+int intToStr(char *s, int i) {
+    char *p = s;
+    char swap;
+    // convert the int to string (appends to string in reverse)
+    while (i > 0) {
+        *p++ = '0' + (i % 10);
+        i /= 10;
+    }
+    int len = p - s;
+    *p = '\0';
+    p--;
+    // reverse the string
+    while (s < p) {
+        swap = *s;
+        *s = *p;
+        *p = swap;
+        s++;
+        p--;
+    }
+    return len;
+}
+
+void cstrCatFmt(cstr s, char const *fmt, ...) {
+    va_list ap;
+    const char *f = fmt;
+    long i;
+    size_t init_len = s->len;
+    size_t fmt_len = strlen(fmt);
+
+    makeRoomFor(s, (init_len + fmt_len) * 2);
+    va_start(ap, fmt);
+    f = fmt;
+    i = init_len;
+
+    while (*f) {
+        char next, *str;
+        size_t l;
+        int num;
+        unsigned long long unum;
+
+        switch (*f) {
+        case '%':
+            next = *(f + 1);
+            f++;
+            switch (next) {
+            case 's':
+                str = va_arg(ap, char *);
+                l = strlen(str);
+                makeRoomFor(s, l);
+                memcpy(s->string + i, str, l);
+                i += l;
+                break;
+            case 'd':
+                num = va_arg(ap, int);
+                char buf[26];
+                l = intToStr(buf, num);
+                memcpy(s->string + i, buf, l);
+                i += l;
+                break;
+            default:
+                s->string[i++] = next;
+                break;
+            }
+            break;
+        default:
+            s->string[i++] = *f;
+            break;
+        }
+        f++;
+    }
+    va_end(ap);
+    s->string[i] = '\0';
+    s->len = i;
+}
