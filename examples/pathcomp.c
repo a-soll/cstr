@@ -15,6 +15,13 @@ int main() {
     printf("%s\n", c->string);
     printf("%s\n", d->string);
     printf("%s\n", e->string);
+
+    cstrDealloc(s);
+    cstrDealloc(a);
+    cstrDealloc(b);
+    cstrDealloc(c);
+    cstrDealloc(d);
+    cstrDealloc(e);
 }
 
 /**
