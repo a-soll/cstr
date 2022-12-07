@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-cstr cstrInit(char *from) {
+cstr cstrInit(const char *from) {
     size_t from_len = strlen(from);
     cstr ret = (cstr)malloc(sizeof(_cs));
     ret->len = from_len;
@@ -22,7 +22,7 @@ static void makeRoomFor(cstr s, size_t len) {
     }
 }
 
-void cstrUpdateString(cstr str, char *from) {
+void cstrUpdateString(cstr str,const char *from) {
     size_t from_len = strlen(from);
     if (from_len > str->alloc) {
         makeRoomFor(str, from_len);

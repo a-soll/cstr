@@ -14,7 +14,7 @@ typedef struct _cs {
 
 typedef _cs *cstr;
 
-cstr cstrInit(char *from);
+cstr cstrInit(const char *from);
 void cstrDealloc(cstr cs);
 void cstrCat(cstr to, const char *from);
 void cstrGrow(cstr s, size_t len);
@@ -34,7 +34,7 @@ cstr *cstrSplit(cstr str, char split_on, int *count);
 cstr pathcomp(cstr s, const char *expr);
 void cstrArrayDealloc(cstr *arr);
 // update cstr->string to new value (from)
-void cstrUpdateString(cstr str, char *from);
+void cstrUpdateString(cstr str, const char *from);
 /**
  * format a cstr
  * %s for string
