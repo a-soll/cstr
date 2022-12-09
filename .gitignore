@@ -5,3 +5,13 @@ a.out
 .DS_Store
 *.dSYM
 test.c
+
+// ignore CMake related files. everything should be done in a build dir,
+// but just in case.
+build
+CMakeFiles
+*.cmake
+CMakeCache.txt
+install_manifest.txt
+*.dylib
+Makefile

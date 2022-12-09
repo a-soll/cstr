@@ -22,7 +22,7 @@ static void makeRoomFor(cstr s, size_t len) {
     }
 }
 
-void cstrUpdateString(cstr str,const char *from) {
+void cstrUpdateString(cstr str, const char *from) {
     size_t from_len = strlen(from);
     if (from_len > str->alloc) {
         makeRoomFor(str, from_len);
