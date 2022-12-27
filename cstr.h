@@ -14,9 +14,11 @@ typedef struct _cs {
 
 typedef _cs *cstr;
 
+// inits cstr with the given string
 cstr cstrInit(const char *from);
 void cstrDealloc(cstr cs);
 void cstrCat(cstr to, const char *from);
+// reallocs the cstr to the specified size
 void cstrGrow(cstr s, size_t len);
 cstr *cstrSplit(cstr str, char split_on, int *count);
 /**
@@ -40,6 +42,12 @@ void cstrUpdateString(cstr str, const char *from);
  * %s for string
  * %d for int
  */
-void cstrCatFmt(cstr s, char const *fmt, ...);
-
+void cstrCatFmt(cstr s, const char *fmt, ...);
+/**
+ * replaces substring in s->string with specified string
+ *
+ * ex (assume passing cstr with the string value)
+ * cstrReplace(aaa<>bbb, <test>) -> aaa<test>bbb
+ */
+void cstrReplace(cstr s, const char *repl, const char *with);
 #endif /* CS_H */
