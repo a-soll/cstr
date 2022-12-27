@@ -7,7 +7,7 @@ cstr cstrInit(const char *from) {
     cstr ret = (cstr)malloc(sizeof(_cs));
     ret->len = from_len;
     ret->string = malloc(sizeof(char) * from_len + 1);
-    ret->alloc = from_len;
+    ret->alloc = from_len + 1;
     memcpy(ret->string, from, from_len);
     ret->string[from_len] = '\0';
     return ret;
@@ -295,4 +295,62 @@ void cstrCatFmt(cstr s, char const *fmt, ...) {
     va_end(ap);
     s->string[i] = '\0';
     s->len = i;
+}
+
+void cstrReplace(cstr s, const char *repl, const char *with) {
+    size_t repl_len = strlen(repl);
+    if (repl_len == 0) {
+        return;
+    }
+    size_t with_len = strlen(with);
+    int offset = 0;    // tracks beginning/end of repl in s
+    int cur_ind = 0;   // current index in tmp
+    const char *start; // position in s to start iteration
+    const char *end;   // position in s to end iteration
+    int up_to = 0;     // beginning of strstr in s
+    char *p = s->string;
+    int new_size = s->len * 2;
+    char *tmp = NULL;
+
+    while ((p = strstr(p, repl)) != NULL) {
+        if (tmp == NULL) {
+            tmp = malloc(new_size * sizeof(char));
+        }
+        start = &s->string[offset];
+        end = &p[repl_len];
+        up_to = ((end - start) - repl_len) + offset; // 1 position before strstr[0]
+        while (offset < up_to) {
+            if (cur_ind >= new_size) {
+                new_size *= 2;
+                tmp = realloc(tmp, new_size);
+            }
+            tmp[cur_ind] = s->string[offset];
+            cur_ind++;
+            offset++;
+        }
+        offset += repl_len;                  // set offset to char immediately after strstr
+        for (int i = 0; i < with_len; i++) { // append with to tmp
+            if (cur_ind + with_len >= new_size) {
+                new_size *= 2;
+                tmp = realloc(tmp, new_size);
+            }
+            tmp[cur_ind] = with[i];
+            cur_ind++;
+        }
+        p += repl_len;
+    }
+    if (offset > 0) { // append rest of s
+        while (offset < s->len) {
+            if (cur_ind >= new_size) {
+                new_size *= 2;
+                tmp = realloc(tmp, new_size);
+            }
+            tmp[cur_ind] = s->string[offset];
+            cur_ind++;
+            offset++;
+        }
+        tmp[cur_ind] = '\0';
+        cstrUpdateString(s, tmp);
+        free(tmp);
+    }
 }
