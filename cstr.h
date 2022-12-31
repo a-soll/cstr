@@ -1,9 +1,7 @@
 #ifndef CS_H
 #define CS_H
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdbool.h>
 #include <sys/types.h>
 
 typedef struct _cs {
@@ -16,6 +14,9 @@ typedef _cs *cstr;
 
 // inits cstr with the given string
 cstr cstrInit(const char *from);
+// inits cstr with the given string and the given size.
+// string can be empty.
+cstr cstrInitSize(const char *from, size_t size);
 void cstrDealloc(cstr cs);
 void cstrCat(cstr to, const char *from);
 // reallocs the cstr to the specified size
@@ -38,9 +39,12 @@ void cstrArrayDealloc(cstr *arr);
 // update cstr->string to new value (from)
 void cstrUpdateString(cstr str, const char *from);
 /**
- * format a cstr
+ * format and concat a string to given cstr
  * %s for string
  * %d for int
+ *
+ * ex:
+ * cstrCatFmt(test, "%s %d", "ing", 1) -> testing 1
  */
 void cstrCatFmt(cstr s, const char *fmt, ...);
 /**
@@ -50,4 +54,25 @@ void cstrCatFmt(cstr s, const char *fmt, ...);
  * cstrReplace(aaa<>bbb, <test>) -> aaa<test>bbb
  */
 void cstrReplace(cstr s, const char *repl, const char *with);
+/**
+ * replaces substring between the two specified strings.
+ * whole_match flag specifies whether to search for only
+ * whole word matches (will replace in the middle of a string if false)
+ * 
+ * the passed cstr is deallocated - you need to assign it (or a new one)
+ * to the return value. returns original cstr if no valid matches found.
+ *
+ * ex (assume passing cstr with the string value)
+ * cstrReplaceBetween(aaa{bbb}ccc, {, }, eee, false) -> aaaeeeccc
+ * cstrReplaceBetween(this is a test string, is, test, <replaced>, true) -> th<replaced> string
+ * cstrReplaceBetween(this is a test string, is, test, <replaced>, false) -> this <replaced> string
+ */
+cstr cstrReplaceBetween(cstr str, const char *start, const char *end, const char *with, bool whole_match);
+/**
+ * concat string to cstr up to specified index
+ *
+ * ex (assume passing cstr with the string value)
+ * cstrnCat(test, long string value, 11) -> test long string
+ */
+void cstrnCat(cstr str, const char *from, int end);
 #endif /* CS_H */

@@ -1,6 +1,4 @@
-#include "../cstr.h"
-#include <stdbool.h>
-#include <stdio.h>
+#include "examples.h"
 
 #define BUFF_SIZE 500
 

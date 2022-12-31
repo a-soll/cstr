@@ -1,5 +1,4 @@
-#include "../cstr.h"
-#include <stdio.h>
+#include "examples.h"
 
 int main() {
     cstr s = cstrInit("aa.bb=cc.dd");
