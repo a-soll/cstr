@@ -8,8 +8,7 @@ cstr cstrInit(const char *from) {
     ret->len = from_len;
     ret->string = malloc(sizeof(char) * from_len + 1);
     ret->alloc = from_len + 1;
-    memcpy(ret->string, from, from_len);
-    ret->string[from_len] = '\0';
+    memcpy(ret->string, from, from_len + 1);
     return ret;
 }
 
@@ -27,8 +26,7 @@ void cstrUpdateString(cstr str, const char *from) {
     if (from_len > str->alloc) {
         makeRoomFor(str, from_len);
     }
-    memcpy(str->string, from, from_len);
-    str->string[from_len] = '\0';
+    memcpy(str->string, from, from_len + 1);
     str->len = from_len;
 }
 
@@ -46,9 +44,8 @@ void cstrCat(cstr to, const char *from) {
     size_t from_len = strlen(from);
     size_t needs = from_len + cur_len;
     makeRoomFor(to, needs);
-    memcpy(to->string + cur_len, from, from_len);
+    memcpy(to->string + cur_len, from, from_len + 1);
     to->len = needs;
-    to->string[to->len] = '\0';
 }
 
 void cstrDealloc(cstr cs) {
