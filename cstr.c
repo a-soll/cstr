@@ -1,17 +1,38 @@
 #include "cstr.h"
-#include <stdbool.h>
-#include <stdio.h>
+#include <ctype.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
 
 cstr cstrInit(const char *from) {
-    size_t from_len = strlen(from);
-    cstr ret = (cstr)malloc(sizeof(_cs));
-    ret->len = from_len;
-    ret->string = malloc(sizeof(char) * from_len + 1);
-    ret->alloc = from_len + 1;
-    memcpy(ret->string, from, from_len + 1);
+    cstr ret = malloc(sizeof(_cs));
+    ret->len = strlen(from);
+    ret->alloc = ret->len + 1;
+    if (ret->len > 0) {
+        ret->string = malloc(sizeof(char) * ret->len + 1);
+        memcpy(ret->string, from, ret->alloc);
+    } else {
+        ret->len = 0;
+        ret->alloc = 10; // if initializing with empty string, set to something usable
+        ret->string = calloc(ret->alloc, 1);
+    }
     return ret;
 }
 
+cstr cstrInitSize(const char *from, size_t size) {
+    cstr ret = malloc(sizeof(_cs));
+    ret->len = strlen(from);
+    ret->alloc = size;
+    if (ret->len != 0) {
+        ret->string = malloc(sizeof(char) * ret->alloc);
+        memcpy(ret->string, from, ret->len + 1);
+    } else {
+        ret->string = calloc(size, 1);
+    }
+    return ret;
+}
+
+// allocates room in s if len > s->alloc
 static void makeRoomFor(cstr s, size_t len) {
     if (s->alloc <= len) {
         while (s->alloc <= len) {
@@ -40,11 +61,10 @@ void cstrGrow(cstr s, size_t len) {
 }
 
 void cstrCat(cstr to, const char *from) {
-    size_t cur_len = to->len;
     size_t from_len = strlen(from);
-    size_t needs = from_len + cur_len;
+    size_t needs = from_len + to->len;
     makeRoomFor(to, needs);
-    memcpy(to->string + cur_len, from, from_len + 1);
+    memcpy(to->string + to->len, from, from_len + 1);
     to->len = needs;
 }
 
@@ -241,7 +261,7 @@ int intToStr(char *s, int i) {
     return len;
 }
 
-void cstrCatFmt(cstr s, char const *fmt, ...) {
+void cstrCatFmt(cstr s, const char *fmt, ...) {
     va_list ap;
     const char *f = fmt;
     long i;
@@ -292,6 +312,14 @@ void cstrCatFmt(cstr s, char const *fmt, ...) {
     va_end(ap);
     s->string[i] = '\0';
     s->len = i;
+}
+
+static bool wholeMatch(const char *str, int start, int end) {
+    bool ret = false;
+    if (start == 0 || (isspace(str[start - 1]) && (isspace(str[end]) || str[end] == '\0'))) {
+        ret = true;
+    }
+    return ret;
 }
 
 void cstrReplace(cstr s, const char *repl, const char *with) {
@@ -350,4 +378,72 @@ void cstrReplace(cstr s, const char *repl, const char *with) {
         cstrUpdateString(s, tmp);
         free(tmp);
     }
+}
+
+cstr cstrReplaceBetween(cstr str, const char *start, const char *end, const char *with, bool whole_match) {
+    size_t start_len;
+    size_t end_len;
+    char *p_start = str->string;
+    char *p_end;
+    int ind_start, ind_end;
+
+    if ((p_start = strstr(p_start, start)) == NULL) {
+        return str;
+    }
+
+    start_len = strlen(start);
+    // match only whole words and ignore parts of a word
+    if (whole_match) {
+        while ((p_start = strstr(p_start, start)) != NULL) {
+            ind_start = &p_start[0] - str->string;
+            ind_end = &p_start[start_len] - str->string;
+            if (wholeMatch(str->string, ind_start, ind_end)) {
+                break;
+            }
+            p_start += start_len;
+        }
+        if (p_start == NULL) {
+            return str;
+        }
+    }
+
+    if ((p_end = strstr(p_start + start_len, end)) == NULL) {
+        return str;
+    }
+
+    end_len = strlen(end);
+    if (whole_match) {
+        while ((p_end = strstr(p_end, end)) != NULL) {
+            ind_start = &p_end[0] - str->string;
+            ind_end = &p_end[end_len] - str->string;
+            if (wholeMatch(str->string, ind_start, ind_end)) {
+                break;
+            }
+            p_end += end_len;
+        }
+        if (p_end == NULL) {
+            return str;
+        }
+    }
+
+    cstr tmp = cstrInitSize("", str->alloc);
+    ind_start = &p_start[0] - str->string;
+    ind_end = (&p_end[0] - str->string) + strlen(end);
+    int repl_size = (ind_end - ind_start);
+    cstrnCat(tmp, str->string, ind_start);
+    cstrCat(tmp, with);
+    cstrCat(tmp, str->string + ind_end);
+    cstrDealloc(str);
+    return tmp;
+}
+
+void cstrnCat(cstr str, const char *from, int end) {
+    size_t from_len = strlen(from);
+    if (end > from_len) {
+        return;
+    }
+    makeRoomFor(str, end + str->len);
+    memcpy(str->string + str->len, from, end);
+    str->len = str->len + end;
+    str->string[str->len] = '\0';
 }
