@@ -58,14 +58,14 @@ void cstrReplace(cstr s, const char *repl, const char *with);
  * replaces substring between the two specified strings.
  * whole_match flag specifies whether to search for only
  * whole word matches (will replace in the middle of a string if false)
- * 
+ *
  * the passed cstr is deallocated - you need to assign it (or a new one)
  * to the return value. returns original cstr if no valid matches found.
  *
  * ex (assume passing cstr with the string value)
- * cstrReplaceBetween(aaa{bbb}ccc, {, }, eee, false) -> aaaeeeccc
- * cstrReplaceBetween(this is a test string, is, test, <replaced>, true) -> th<replaced> string
- * cstrReplaceBetween(this is a test string, is, test, <replaced>, false) -> this <replaced> string
+ * cstrReplaceBetween(aaa<>bbb, aaa, bbb, XXX, false) -> aaaXXXbbb
+ * cstrReplaceBetween(aaa<>bbb, aaa, bbb, XXX, true) -> aaa<>bbb
+ * cstrReplaceBetween(aaa <> bbb, aaa, bbb, XXX, true) -> aaaXXXbbb
  */
 cstr cstrReplaceBetween(cstr str, const char *start, const char *end, const char *with, bool whole_match);
 /**

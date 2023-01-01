@@ -316,8 +316,10 @@ void cstrCatFmt(cstr s, const char *fmt, ...) {
 
 static bool wholeMatch(const char *str, int start, int end) {
     bool ret = false;
-    if (start == 0 || (isspace(str[start - 1]) && (isspace(str[end]) || str[end] == '\0'))) {
-        ret = true;
+    if (start == 0 || isspace(str[start - 1])) {
+        if (isspace(str[end]) || str[end] == '\0') {
+            ret = true;
+        }
     }
     return ret;
 }
@@ -427,8 +429,13 @@ cstr cstrReplaceBetween(cstr str, const char *start, const char *end, const char
     }
 
     cstr tmp = cstrInitSize("", str->alloc);
-    ind_start = &p_start[0] - str->string;
-    ind_end = (&p_end[0] - str->string) + strlen(end);
+
+    ind_start = (&p_start[0] - str->string) + start_len;
+    ind_end = &p_end[0] - str->string + end_len;
+    if (!wholeMatch(str->string, ind_end, end_len)) {
+        ind_end -= end_len;
+    }
+
     int repl_size = (ind_end - ind_start);
     cstrnCat(tmp, str->string, ind_start);
     cstrCat(tmp, with);
