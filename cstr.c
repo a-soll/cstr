@@ -102,10 +102,10 @@ cstr *cstrSplit(cstr str, const char *split_on, int *count) {
             break;
         }
         max_split--;
-        if (arr == NULL) {
+        if (!arr) {
             arr = malloc(sizeof(cstr) * slots);
         }
-        if (slots >= elements) {
+        if (slots <= elements) {
             slots *= 2;
             arr = realloc(arr, sizeof(cstr) * slots);
         }
@@ -122,27 +122,26 @@ cstr *cstrSplit(cstr str, const char *split_on, int *count) {
         tmp[0] = '\0'; // reset tmp to avoid adding duplicate values
         p += split_len;
     }
-    if (elements == 0) {
-        return NULL;
+    if (!arr) {
+        return arr;
     }
     if (slots <= elements + 2) {
-        arr = realloc(arr, sizeof(cstr) * (slots + 1));
+        arr = realloc(arr, sizeof(cstr) * (elements + 2));
     }
-    if (elements > 0) {
-        size_t len = str->len - ind_end;
-        memcpy(tmp, str->string + offset, len);
-        tmp[len] = '\0';
+    size_t len = str->len - ind_end;
+    memcpy(tmp, str->string + offset, len);
+    tmp[len] = '\0';
+    if (tmp[0]) { // avoid adding NULL string
         arr[elements] = cstrInit(tmp);
         elements++;
-        arr[elements] = NULL;
-        *count = elements;
     }
+    arr[elements] = NULL;
+    *count = elements;
     return arr;
 }
 
 static int pathcompRight(cstr str, char *tmp, const char *expr) {
     int item_ind = -1;
-    int tmp_ind = 0;
 
     for (int i = str->len; i >= 0; i--) {
         if (str->string[i] == expr[0]) {
@@ -218,25 +217,20 @@ static int startPathComp(cstr str, char *tmp, const char *expr) {
 }
 
 // handles multiple patterns in single expr
-static int pathloop(cstr str, char *tmp, const char *expr) {
+static void pathloop(cstr str, char *tmp, const char *expr) {
     char new_expr[4];
     int offset = 6;
     int i = 3;
-    int item_ind = -1;
     while (i <= strlen(expr) - 1) {
         const char *start = &expr[i];
         const char *end = &expr[offset];
         memcpy(new_expr, start, end - start);
         new_expr[3] = '\0';
-        item_ind = startPathComp(str, tmp, new_expr);
+        startPathComp(str, tmp, new_expr);
         i += 3;
         offset += 3;
-        if (item_ind == -1) {
-            return -1;
-        }
         cstrUpdateString(str, tmp);
     }
-    return 0;
 }
 
 cstr pathcomp(cstr s, const char *expr) {
@@ -252,7 +246,7 @@ cstr pathcomp(cstr s, const char *expr) {
         return NULL;
     }
     str = cstrInit(tmp);
-    item_ind = pathloop(str, tmp, expr);
+    pathloop(str, tmp, expr);
     return str;
 }
 
@@ -294,7 +288,6 @@ void cstrCatFmt(cstr s, const char *fmt, ...) {
         char next, *str;
         size_t l;
         int num;
-        unsigned long long unum;
 
         switch (*f) {
         case '%':
@@ -395,6 +388,8 @@ void cstrReplace(cstr s, const char *repl, const char *with) {
         }
         tmp[cur_ind] = '\0';
         cstrUpdateString(s, tmp);
+    }
+    if (tmp) {
         free(tmp);
     }
 }
@@ -453,7 +448,6 @@ cstr cstrReplaceBetween(cstr str, const char *start, const char *end, const char
         ind_end -= end_len;
     }
 
-    int repl_size = (ind_end - ind_start);
     cstrnCat(tmp, str->string, ind_start);
     cstrCat(tmp, with);
     cstrCat(tmp, str->string + ind_end);
