@@ -21,7 +21,15 @@ void cstrDealloc(cstr cs);
 void cstrCat(cstr to, const char *from);
 // reallocs the cstr to the specified size
 void cstrGrow(cstr s, size_t len);
-cstr *cstrSplit(cstr str, char split_on, int *count);
+/**
+ * splits on given string and returns NULL terminated array of cstr.
+ * updates count with number of elements in array excluding NULL term.
+ * pass a non-zero value as count to set the maximum number of splits.
+ *
+ * ex (assume passing cstr with given string):
+ * cstrSplit(test<>string, <>, 0) -> [test, string]
+ */
+cstr *cstrSplit(cstr str, const char *split_on, int *count);
 /**
  * search for character and return string from there.
  * expr is the char to search for [0], the direction to search from [1],
@@ -75,4 +83,6 @@ cstr cstrReplaceBetween(cstr str, const char *start, const char *end, const char
  * cstrnCat(test, long string value, 11) -> test long string
  */
 void cstrnCat(cstr str, const char *from, int end);
+// returns a copy of given cstr. does not deallocate.
+cstr cstrCopy(cstr from);
 #endif /* CS_H */

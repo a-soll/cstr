@@ -2,27 +2,38 @@
 
 int main() {
     cstr str;
-
-    str = cstrInit("test,this,string");
+    str = cstrInit("test<>this<>string");
 
     int count = 0;
-    cstr *split = cstrSplit(str, ',', &count);
-    printf("%d\n", count);
+    cstr *split = cstrSplit(str, "<>", &count);
+    printf("count %d\n", count);
 
-    int i = 0;
-    while (split[i] != NULL) {
+    for (int i = 0; i < count; i++) {
         printf("%s\n", split[i]->string);
-        i++;
     }
+
+    // setting count to 1 before passing will only allow for 1 split. can be any number.
+    count = 1;
+    cstr *split2 = cstrSplit(str, "<>", &count);
+    printf("count %d\n", count);
+
+    for (int i = 0; i < count; i++) {
+        printf("%s\n", split2[i]->string);
+    }
+
     cstrDealloc(str);
     cstrArrayDealloc(split);
+    cstrArrayDealloc(split2);
 }
 
 /*
 output:
-$ clang split.c ../cstr.c -o a.out && ./a.out
-3
+$ clang split.c ../cstr.c && ./a.out
+count 3
 test
 this
 string
+count 2
+test
+this<>string
 */

@@ -82,45 +82,62 @@ void cstrArrayDealloc(cstr *arr) {
     free(arr);
 }
 
-cstr *cstrSplit(cstr str, char split_on, int *count) {
-    int ind = 0;
-    *count = 0;
-    int elements = 0;
+cstr *cstrSplit(cstr str, const char *split_on, int *count) {
+    char *p = str->string;
+    int max_split = -1;
+    if (*count > 0) {
+        max_split = *count;
+    }
+    size_t split_len = strlen(split_on);
     int slots = 3; // minimum size for 2 elements + NULL
+    int elements = 0;
+    int ind_start, ind_end;
+    cstr *arr = NULL;
+    int offset = 0;
+    *count = 0;
     char tmp[str->len];
-    cstr *c = malloc(sizeof(cstr) * slots);
 
-    for (int i = 0; i < str->len; i++) {
-        if (str->string[i] == split_on) {
-            if (slots <= elements) {
-                slots *= 2;
-                c = realloc(c, sizeof(cstr) * slots);
-            }
-            tmp[ind] = '\0';
-            c[elements] = cstrInit(tmp);
-            elements++;
-            ind = 0;
-        } else {
-            tmp[ind] = str->string[i];
-            ind++;
+    while ((p = strstr(p, split_on)) != NULL) {
+        if (max_split == 0) {
+            break;
         }
+        max_split--;
+        if (arr == NULL) {
+            arr = malloc(sizeof(cstr) * slots);
+        }
+        if (slots >= elements) {
+            slots *= 2;
+            arr = realloc(arr, sizeof(cstr) * slots);
+        }
+        ind_start = &p[0] - str->string;
+        ind_end = &p[0] - str->string + split_len;
+        size_t len = ind_start - offset;
+        memcpy(tmp, str->string + offset, len);
+        offset = ind_end;
+        tmp[len] = '\0';
+        if (tmp[0] != '\0') {
+            arr[elements] = cstrInit(tmp);
+            elements++;
+        }
+        tmp[0] = '\0'; // reset tmp to avoid adding duplicate values
+        p += split_len;
     }
-    // nothing to split
     if (elements == 0) {
-        c[0] = NULL;
-        return c;
+        return NULL;
     }
-    if (slots <= elements + 2) { // resize to fit terminating NULL
-        c = realloc(c, sizeof(cstr) * (slots + 1));
+    if (slots <= elements + 2) {
+        arr = realloc(arr, sizeof(cstr) * (slots + 1));
     }
     if (elements > 0) {
-        tmp[ind] = '\0';
-        c[elements] = cstrInit(tmp);
+        size_t len = str->len - ind_end;
+        memcpy(tmp, str->string + offset, len);
+        tmp[len] = '\0';
+        arr[elements] = cstrInit(tmp);
         elements++;
-        c[elements] = NULL;
+        arr[elements] = NULL;
         *count = elements;
     }
-    return c;
+    return arr;
 }
 
 static int pathcompRight(cstr str, char *tmp, const char *expr) {
@@ -453,4 +470,10 @@ void cstrnCat(cstr str, const char *from, int end) {
     memcpy(str->string + str->len, from, end);
     str->len = str->len + end;
     str->string[str->len] = '\0';
+}
+
+cstr cstrCopy(cstr from) {
+    cstr new = malloc(sizeof(*from));
+    memcpy(new, from, sizeof(*from));
+    return new;
 }
