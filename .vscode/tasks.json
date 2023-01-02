@@ -1,0 +1,45 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "Build",
+            "command": "clang",
+            "args": [
+                "-g",
+                "${fileBasename}",
+                "../cstr.c",
+                "-o",
+                "a.out"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}/examples/"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "run make debug"
+        },
+        {
+            "type": "cppbuild",
+            "label": "BuildTest",
+            "command": "clang",
+            "args": [
+                "-g",
+                "test.c",
+                "cstr.c",
+                "-o",
+                "a.out"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}/"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "run make debug"
+        }
+    ]
+}
