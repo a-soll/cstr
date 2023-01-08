@@ -275,14 +275,12 @@ int intToStr(char *s, int i) {
 void cstrCatFmt(cstr s, const char *fmt, ...) {
     va_list ap;
     const char *f = fmt;
-    long i;
     size_t init_len = s->len;
     size_t fmt_len = strlen(fmt);
 
     makeRoomFor(s, (init_len + fmt_len) * 2);
     va_start(ap, fmt);
     f = fmt;
-    i = init_len;
 
     while (*f) {
         char next, *str;
@@ -297,31 +295,32 @@ void cstrCatFmt(cstr s, const char *fmt, ...) {
             case 's':
                 str = va_arg(ap, char *);
                 l = strlen(str);
-                makeRoomFor(s, l);
-                memcpy(s->string + i, str, l);
-                i += l;
+                makeRoomFor(s, l + s->len);
+                memcpy(s->string + s->len, str, l);
+                s->len += l;
                 break;
             case 'd':
                 num = va_arg(ap, int);
                 char buf[26];
                 l = intToStr(buf, num);
-                memcpy(s->string + i, buf, l);
-                i += l;
+                makeRoomFor(s, l + s->len);
+                memcpy(s->string + s->len, buf, l);
+                s->len += l;
                 break;
             default:
-                s->string[i++] = next;
+                makeRoomFor(s, s->len + 1);
+                s->string[s->len++] = next;
                 break;
             }
             break;
         default:
-            s->string[i++] = *f;
+            s->string[s->len++] = *f;
             break;
         }
         f++;
     }
     va_end(ap);
-    s->string[i] = '\0';
-    s->len = i;
+    s->string[s->len] = '\0';
 }
 
 static bool wholeMatch(const char *str, int start, int end) {
