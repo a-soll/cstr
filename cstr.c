@@ -44,8 +44,8 @@ static void makeRoomFor(cstr s, size_t len) {
 
 void cstrUpdateString(cstr str, const char *from) {
     size_t from_len = strlen(from);
-    if (from_len > str->alloc) {
-        makeRoomFor(str, from_len);
+    if (from_len + 1 > str->alloc) {
+        makeRoomFor(str, from_len + 1);
     }
     memcpy(str->string, from, from_len + 1);
     str->len = from_len;
